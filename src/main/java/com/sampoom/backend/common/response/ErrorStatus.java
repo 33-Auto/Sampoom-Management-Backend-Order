@@ -12,8 +12,9 @@ public enum ErrorStatus {
     // 400 BAD_REQUEST
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     MISSING_EMAIL_VERIFICATION_EXCEPTION(HttpStatus.BAD_REQUEST, "이메일 인증을 진행해주세요."),
-    ALREADY_REGISTER_EMAIL_EXCEPETION(HttpStatus.BAD_REQUEST, "이미 가입된 이메일 입니다."),
-
+    ALREADY_REGISTER_EMAIL_EXCEPTION(HttpStatus.BAD_REQUEST, "이미 가입된 이메일 입니다."),
+    INVALID_REQUESTER(HttpStatus.BAD_REQUEST, "잘못된 주문 요청 주체입니다"),
+    INVALID_ORDER_TYPE(HttpStatus.BAD_REQUEST, "잘못된 주문 타입입니다."),
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
