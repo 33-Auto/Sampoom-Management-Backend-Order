@@ -35,7 +35,7 @@ public class OrderController {
                 .id(1L)
                 .items(items)
                 .requester(Requester.WAREHOUSE)
-                .branch("강원도")
+                .branch("평택점")
                 .type(OrderType.PART)
                 .build();
 
