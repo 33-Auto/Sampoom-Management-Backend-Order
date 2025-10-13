@@ -8,7 +8,8 @@ COPY ${JAR_FILE} app.jar
 
 ENV SPRING_PROFILES_ACTIVE=prod \
     SERVER_PORT=8080 \
+    SERVER_ADDRESS=0.0.0.0 \
     TZ=Asia/Seoul
 
 EXPOSE 8080
-ENTRYPOINT ["sh","-c","java -Dserver.port=${SERVER_PORT} -Duser.timezone=${TZ} -jar /app/app.jar"]
+ENTRYPOINT ["sh","-c","java -Dserver.port=${SERVER_PORT} -Dserver.address=${SERVER_ADDRESS} -Duser.timezone=${TZ} -jar /app/app.jar"]
