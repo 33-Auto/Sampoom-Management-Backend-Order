@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import static org.springframework.http.CacheControl.maxAge;
+
 @Configuration
 public class WebConfig {
 
@@ -17,7 +19,8 @@ public class WebConfig {
                         .allowedOrigins("https://sampoom.store")
                         .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(true)
+                        .maxAge(3600);;
             }
         };
     }
