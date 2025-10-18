@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "order_table")
+@Table(name = "order")
 public class Order extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,4 +18,5 @@ public class Order extends BaseTimeEntity {
     private Requester requester;
     private String branch;
     private OrderType type;
+    private OrderStatus status;
 }
