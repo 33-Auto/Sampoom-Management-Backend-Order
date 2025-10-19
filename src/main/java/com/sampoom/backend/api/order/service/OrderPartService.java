@@ -13,7 +13,6 @@ public class OrderPartService {
     @Autowired
     EntityManager entityManager;
 
-    @Transactional
     protected void saveAllParts(Long orderId, List<ItemDto> items) {
         if (items.isEmpty()) return;
 

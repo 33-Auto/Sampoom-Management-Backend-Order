@@ -9,6 +9,7 @@ import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
 import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.api.order.sender.OrderSender;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class OrderService {
     private final OrderPartService orderPartService;
     private final OrderSender orderSender;
 
+    @Transactional
     public OrderResDto createOrder(OrderReqDto orderReqDto) {
         Order newOrder = Order.builder()
                 .requester(orderReqDto.getRequester())
