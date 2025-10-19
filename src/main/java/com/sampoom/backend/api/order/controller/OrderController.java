@@ -20,25 +20,10 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResDto>> createOrder(@RequestBody OrderReqDto order) {
-        List<ItemDto> items = List.of(
-                ItemDto.builder()
-                        .code("ENG-01-001")
-                        .quantity(2)
-                        .build(),
-                ItemDto.builder()
-                        .code("ENG-01-002")
-                        .quantity(3)
-                        .build()
-        );
+        OrderResDto orderResDto = orderService.createOrder(order);
+        orderService.sendOrderToDownstream(order);
 
-        OrderResDto orderResDto = OrderResDto.builder()
-                .id(1L)
-                .items(items)
-                .requester(Requester.WAREHOUSE)
-                .branch("평택점")
-                .build();
-
-        return ApiResponse.success(SuccessStatus.OK, orderService.createOrder(order));
+        return ApiResponse.success(SuccessStatus.OK, orderResDto);
     }
 
     @GetMapping("/{orderId}")

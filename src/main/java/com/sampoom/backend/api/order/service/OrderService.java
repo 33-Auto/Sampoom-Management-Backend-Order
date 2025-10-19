@@ -9,9 +9,9 @@ import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
 import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.api.order.sender.OrderSender;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +31,16 @@ public class OrderService {
         orderRepository.save(newOrder);
         orderPartService.saveAllParts(newOrder.getId(), orderReqDto.getItems());
 
+        return OrderResDto.builder()
+                .id(newOrder.getId())
+                .requester(orderReqDto.getRequester())
+                .branch(orderReqDto.getBranch())
+                .status(OrderStatus.PENDING)
+                .items(orderReqDto.getItems())
+                .build();
+    }
+
+    public void sendOrderToDownstream(OrderReqDto orderReqDto) {
         if (orderReqDto.getRequester() == Requester.AGENCY) {
             ToWarehouseDto toWarehouseDto = ToWarehouseDto.builder()
                     .branch(orderReqDto.getBranch())
@@ -44,16 +54,7 @@ public class OrderService {
                     .build();
             orderSender.sendOrderToFactory(toFactoryDto);
         }
-
-        return OrderResDto.builder()
-                .id(newOrder.getId())
-                .requester(orderReqDto.getRequester())
-                .branch(orderReqDto.getBranch())
-                .status(OrderStatus.PENDING)
-                .items(orderReqDto.getItems())
-                .build();
     }
-
 
 
 }
