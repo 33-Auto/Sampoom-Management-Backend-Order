@@ -9,10 +9,8 @@ import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
 import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.api.order.sender.OrderSender;
-import com.sampoom.backend.api.order.sender.WarehouseClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 @RequiredArgsConstructor
@@ -20,9 +18,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderPartService orderPartService;
     private final OrderSender orderSender;
-    private final WarehouseClient warehouseClient;
 
-    public OrderResDto createOrder(@RequestBody OrderReqDto orderReqDto) {
+    public OrderResDto createOrder(OrderReqDto orderReqDto) {
         Order newOrder = Order.builder()
                 .requester(orderReqDto.getRequester())
                 .branch(orderReqDto.getBranch())
