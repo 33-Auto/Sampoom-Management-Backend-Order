@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -62,32 +63,30 @@ public class OrderService {
     }
 
     public List<OrderResDto> getOrders(String from) {
-        List<Order> orders;
+        Requester requester;
 
         if (from == null)
             throw new BadRequestException(ErrorStatus.NO_QUERY_PARAMETER.getMessage());
         else if (from.equals(Requester.AGENCY.toString().toLowerCase())) {
-            orders = orderRepository.findByRequester(Requester.AGENCY);
+            requester = Requester.AGENCY;
         } else if (from.equals(Requester.WAREHOUSE.toString().toLowerCase())) {
-            orders = orderRepository.findByRequester(Requester.WAREHOUSE);
+            requester = Requester.WAREHOUSE;
         } else
             throw new BadRequestException(ErrorStatus.INVALID_QUERY_PARAMETER.getMessage());
 
-        List<OrderResDto> orderResDtos = new ArrayList<>();
-        for (Order order : orders) {
-            List<ItemDto> itemDtos = orderPartRepository.findByOrderId(order.getId());
-            orderResDtos.add(
-                    OrderResDto.builder()
-                            .id(order.getId())
-                            .requester(order.getRequester())
-                            .branch(order.getBranch())
-                            .status(order.getStatus())
-                            .items(itemDtos)
-                            .build()
-            );
-        }
+        List<Order> orders = orderRepository.findWithItemsByRequester(requester);
 
-        return orderResDtos;
+        return orders.stream()
+                .map(order -> OrderResDto.builder()
+                        .id(order.getId())
+                        .requester(order.getRequester())
+                        .branch(order.getBranch())
+                        .status(order.getStatus())
+                        .items(order.getOrderParts().stream()
+                                .map(op -> new ItemDto(op.getCode(), op.getQuantity()))
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
     }
 
 }

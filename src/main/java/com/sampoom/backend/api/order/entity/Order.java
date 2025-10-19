@@ -4,6 +4,9 @@ import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter @Setter
 @Builder
@@ -18,4 +21,7 @@ public class Order extends BaseTimeEntity {
     private Requester requester;
     private String branch;
     private OrderStatus status;
+
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    private List<OrderPart> orderParts = new ArrayList<>();
 }
