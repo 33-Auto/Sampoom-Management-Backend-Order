@@ -52,15 +52,6 @@ public class OrderServiceTest {
                 .items(items)
                 .build();
 
-        Order savedOrder = Order.builder()
-                .branch(branch)
-                .requester(requester)
-                .status(OrderStatus.PENDING)
-                .build();
-
-//        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
-        orderRepository.save(savedOrder);
-
         // when
         OrderResDto orderResDto = orderService.createOrder(req);
 
