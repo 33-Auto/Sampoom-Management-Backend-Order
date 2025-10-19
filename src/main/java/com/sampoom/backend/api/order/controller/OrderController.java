@@ -48,4 +48,9 @@ public class OrderController {
 
         return ApiResponse.success(SuccessStatus.OK, orderResDto);
     }
+
+    @GetMapping("/requested")
+    public ResponseEntity<ApiResponse<List<OrderResDto>>> getRequestedOrders(@RequestParam String from) {
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from));
+    }
 }
