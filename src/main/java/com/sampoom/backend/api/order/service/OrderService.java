@@ -1,22 +1,27 @@
 package com.sampoom.backend.api.order.service;
 
-import com.sampoom.backend.api.order.dto.OrderReqDto;
-import com.sampoom.backend.api.order.dto.OrderResDto;
-import com.sampoom.backend.api.order.dto.ToFactoryDto;
-import com.sampoom.backend.api.order.dto.ToWarehouseDto;
+import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
+import com.sampoom.backend.api.order.repository.OrderPartRepository;
 import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.api.order.sender.OrderSender;
+import com.sampoom.backend.common.exception.BadRequestException;
+import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final OrderPartRepository orderPartRepository;
     private final OrderPartService orderPartService;
     private final OrderSender orderSender;
 
@@ -56,5 +61,33 @@ public class OrderService {
         }
     }
 
+    public List<OrderResDto> getOrders(String from) {
+        List<Order> orders;
+
+        if (from == null)
+            throw new BadRequestException(ErrorStatus.NO_PATH_VARIABLE.getMessage());
+        else if (from.equals(Requester.AGENCY.toString().toLowerCase())) {
+            orders = orderRepository.findByRequester(Requester.AGENCY);
+        } else if (from.equals(Requester.WAREHOUSE.toString().toLowerCase())) {
+            orders = orderRepository.findByRequester(Requester.WAREHOUSE);
+        } else
+            throw new BadRequestException(ErrorStatus.INVALID_PATH_VARIABLE.getMessage());
+
+        List<OrderResDto> orderResDtos = new ArrayList<>();
+        for (Order order : orders) {
+            List<ItemDto> itemDtos = orderPartRepository.findByOrderId(order.getId());
+            orderResDtos.add(
+                    OrderResDto.builder()
+                            .id(order.getId())
+                            .requester(order.getRequester())
+                            .branch(order.getBranch())
+                            .status(order.getStatus())
+                            .items(itemDtos)
+                            .build()
+            );
+        }
+
+        return orderResDtos;
+    }
 
 }
