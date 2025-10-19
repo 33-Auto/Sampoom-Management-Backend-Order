@@ -19,5 +19,5 @@ public class OrderPart {
     private Order order;
 
     private String code;
-    private Long quantity;
+    private Integer quantity;
 }

@@ -20,5 +20,5 @@ public class OrderMaterial {
     private Order order;
 
     private String code;
-    private Long quantity;
+    private Integer quantity;
 }
