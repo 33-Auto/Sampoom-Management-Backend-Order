@@ -16,8 +16,8 @@ public enum ErrorStatus {
     INVALID_REQUESTER(HttpStatus.BAD_REQUEST, "잘못된 주문 요청 주체입니다"),
     INVALID_ORDER_TYPE(HttpStatus.BAD_REQUEST, "잘못된 주문 타입입니다."),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "잘못된 배송 상태입니다"),
-    NO_PATH_VARIABLE(HttpStatus.BAD_REQUEST, "요청 경로가 없습니다."),
-    INVALID_PATH_VARIABLE(HttpStatus.BAD_REQUEST, "요청 경로가 잘못되었습니다."),
+    NO_QUERY_PARAMETER(HttpStatus.BAD_REQUEST, "요청 경로가 없습니다."),
+    INVALID_QUERY_PARAMETER(HttpStatus.BAD_REQUEST, "요청 경로가 잘못되었습니다."),
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),

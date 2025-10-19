@@ -65,13 +65,13 @@ public class OrderService {
         List<Order> orders;
 
         if (from == null)
-            throw new BadRequestException(ErrorStatus.NO_PATH_VARIABLE.getMessage());
+            throw new BadRequestException(ErrorStatus.NO_QUERY_PARAMETER.getMessage());
         else if (from.equals(Requester.AGENCY.toString().toLowerCase())) {
             orders = orderRepository.findByRequester(Requester.AGENCY);
         } else if (from.equals(Requester.WAREHOUSE.toString().toLowerCase())) {
             orders = orderRepository.findByRequester(Requester.WAREHOUSE);
         } else
-            throw new BadRequestException(ErrorStatus.INVALID_PATH_VARIABLE.getMessage());
+            throw new BadRequestException(ErrorStatus.INVALID_QUERY_PARAMETER.getMessage());
 
         List<OrderResDto> orderResDtos = new ArrayList<>();
         for (Order order : orders) {
