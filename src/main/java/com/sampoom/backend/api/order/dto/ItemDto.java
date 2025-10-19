@@ -9,5 +9,5 @@ import lombok.ToString;
 @ToString @Builder
 public class ItemDto {
     private String code;
-    private Long quantity;
+    private Integer quantity;
 }

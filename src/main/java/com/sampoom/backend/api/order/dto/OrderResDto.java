@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.order.dto;
 
+import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.OrderType;
 import com.sampoom.backend.api.order.entity.Requester;
 import lombok.Builder;
@@ -18,4 +19,5 @@ public class OrderResDto {
     private String branch;
     private OrderType type;
     private List<ItemDto> items;
+    private OrderStatus status;
 }

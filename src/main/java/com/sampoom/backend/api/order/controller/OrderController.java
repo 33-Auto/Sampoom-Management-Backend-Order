@@ -6,6 +6,7 @@ import com.sampoom.backend.api.order.dto.OrderResDto;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderType;
 import com.sampoom.backend.api.order.entity.Requester;
+import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +18,18 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class OrderController {
+    private final OrderService orderService;
+
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResDto>> createOrder(@RequestBody OrderReqDto order) {
         List<ItemDto> items = List.of(
                 ItemDto.builder()
                         .code("ENG-01-001")
-                        .quantity(2L)
+                        .quantity(2)
                         .build(),
                 ItemDto.builder()
                         .code("ENG-01-002")
-                        .quantity(3L)
+                        .quantity(3)
                         .build()
         );
 
@@ -38,7 +41,7 @@ public class OrderController {
                 .type(OrderType.PART)
                 .build();
 
-        return ApiResponse.success(SuccessStatus.OK, orderResDto);
+        return ApiResponse.success(SuccessStatus.OK, orderService.createOrder(order));
     }
 
     @GetMapping("/{orderId}")
@@ -46,11 +49,11 @@ public class OrderController {
         List<ItemDto> items = List.of(
                 ItemDto.builder()
                         .code("ENG-01-001")
-                        .quantity(2L)
+                        .quantity(2)
                         .build(),
                 ItemDto.builder()
                         .code("ENG-01-002")
-                        .quantity(3L)
+                        .quantity(3)
                         .build()
         );
 
