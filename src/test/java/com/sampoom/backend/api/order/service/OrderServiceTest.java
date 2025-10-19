@@ -6,13 +6,11 @@ import com.sampoom.backend.api.order.dto.OrderResDto;
 import com.sampoom.backend.api.order.dto.ToWarehouseDto;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderStatus;
-import com.sampoom.backend.api.order.entity.OrderType;
 import com.sampoom.backend.api.order.entity.Requester;
 import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.api.order.sender.WarehouseClient;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -38,7 +36,6 @@ public class OrderServiceTest {
     void should_create_order() {
         Requester requester = Requester.AGENCY;
         String branch = "branch";
-        OrderType type = OrderType.PART;
         List<ItemDto> items = List.of(
                 ItemDto.builder()
                         .code("ENG-01-001")
@@ -52,14 +49,12 @@ public class OrderServiceTest {
         OrderReqDto req = OrderReqDto.builder()
                 .requester(requester)
                 .branch(branch)
-                .type(type)
                 .items(items)
                 .build();
 
         Order savedOrder = Order.builder()
                 .branch(branch)
                 .requester(requester)
-                .type(type)
                 .status(OrderStatus.PENDING)
                 .build();
 

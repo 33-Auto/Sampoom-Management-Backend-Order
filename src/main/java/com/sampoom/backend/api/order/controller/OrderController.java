@@ -3,8 +3,6 @@ package com.sampoom.backend.api.order.controller;
 import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.OrderResDto;
-import com.sampoom.backend.api.order.entity.Order;
-import com.sampoom.backend.api.order.entity.OrderType;
 import com.sampoom.backend.api.order.entity.Requester;
 import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.common.response.ApiResponse;
@@ -38,7 +36,6 @@ public class OrderController {
                 .items(items)
                 .requester(Requester.WAREHOUSE)
                 .branch("평택점")
-                .type(OrderType.PART)
                 .build();
 
         return ApiResponse.success(SuccessStatus.OK, orderService.createOrder(order));
@@ -62,7 +59,6 @@ public class OrderController {
                 .items(items)
                 .requester(Requester.WAREHOUSE)
                 .branch("강원도")
-                .type(OrderType.PART)
                 .build();
 
         return ApiResponse.success(SuccessStatus.OK, orderResDto);

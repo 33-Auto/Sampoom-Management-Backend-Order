@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.order.dto;
 
-import com.sampoom.backend.api.order.entity.OrderType;
 import com.sampoom.backend.api.order.entity.Requester;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +14,5 @@ import java.util.List;
 public class OrderReqDto {
     private Requester requester;
     private String branch;
-    private OrderType type;
     private List<ItemDto> items;
 }

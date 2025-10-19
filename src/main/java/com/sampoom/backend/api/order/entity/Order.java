@@ -17,6 +17,5 @@ public class Order extends BaseTimeEntity {
 
     private Requester requester;
     private String branch;
-    private OrderType type;
     private OrderStatus status;
 }
