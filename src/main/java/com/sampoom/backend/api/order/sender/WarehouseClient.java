@@ -13,7 +13,7 @@ public class WarehouseClient {
 
     public void sendOrderToWarehouse(ToWarehouseDto orderDto) {
         webClient.patch()
-                .uri("http://warehouse-service/order")
+                .uri("http://warehouse-service:8080/order")
                 .bodyValue(orderDto)
                 .retrieve()
                 .bodyToMono(Void.class)
