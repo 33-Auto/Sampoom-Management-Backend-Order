@@ -13,7 +13,7 @@ public class FactoryClient {
 
     public void sendOrderToFactory(ToFactoryDto orderDto) {
         webClient.patch()
-                .uri("http://factory-service/order")
+                .uri("http://factory-service:8080/part/order")
                 .bodyValue(orderDto)
                 .retrieve()
                 .bodyToMono(Void.class)
