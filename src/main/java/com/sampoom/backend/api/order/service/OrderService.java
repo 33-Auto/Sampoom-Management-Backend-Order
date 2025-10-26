@@ -59,7 +59,7 @@ public class OrderService {
         }
     }
 
-    public List<OrderResDto> getOrders(String from) {
+    public List<OrderResDto> getOrders(String from, String branch) {
         Requester requester;
 
         if (from == null)
@@ -71,7 +71,7 @@ public class OrderService {
         } else
             throw new BadRequestException(ErrorStatus.INVALID_QUERY_PARAMETER.getMessage());
 
-        List<Order> orders = orderRepository.findWithItemsByRequester(requester);
+        List<Order> orders = orderRepository.findWithItemsByRequesterAndBranch(requester, branch);
 
         return orders.stream()
                 .map(order -> OrderResDto.builder()
