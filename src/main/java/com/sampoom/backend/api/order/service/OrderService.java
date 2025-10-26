@@ -4,7 +4,6 @@ import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
-import com.sampoom.backend.api.order.repository.OrderPartRepository;
 import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.api.order.sender.OrderSender;
 import com.sampoom.backend.common.exception.BadRequestException;
