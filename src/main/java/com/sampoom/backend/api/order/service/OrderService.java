@@ -13,9 +13,11 @@ import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,19 +58,21 @@ public class OrderService {
                 .build();
     }
 
-    public List<OrderResDto> getOrders(String from) {
+    @Transactional(readOnly = true)
+    public List<OrderResDto> getOrders(String from, String branch) {
         Requester requester;
 
-        if (from == null)
+        if (!StringUtils.hasText(from)) {
             throw new BadRequestException(ErrorStatus.NO_QUERY_PARAMETER.getMessage());
-        else if (from.equals(Requester.AGENCY.toString().toLowerCase())) {
-            requester = Requester.AGENCY;
-        } else if (from.equals(Requester.WAREHOUSE.toString().toLowerCase())) {
-            requester = Requester.WAREHOUSE;
-        } else
+        }
+        try {
+            requester = Requester.valueOf(from.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
             throw new BadRequestException(ErrorStatus.INVALID_QUERY_PARAMETER.getMessage());
+        }
 
-        List<Order> orders = orderRepository.findWithItemsByRequester(requester);
+        final String normalizedBranch = StringUtils.hasText(branch) ? branch.trim() : null;
+        List<Order> orders = orderRepository.findWithItemsByRequesterAndBranch(requester, normalizedBranch);
 
         return orders.stream()
                 .map(order -> OrderResDto.builder()

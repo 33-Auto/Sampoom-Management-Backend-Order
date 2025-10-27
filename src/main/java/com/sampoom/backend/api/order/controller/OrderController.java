@@ -49,7 +49,8 @@ public class OrderController {
     }
 
     @GetMapping("/requested")
-    public ResponseEntity<ApiResponse<List<OrderResDto>>> getRequestedOrders(@RequestParam String from) {
-        return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from));
+    public ResponseEntity<ApiResponse<List<OrderResDto>>> getRequestedOrders(@RequestParam String from,
+                                                                             @RequestParam(required = false) String branch) {
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from, branch));
     }
 }
