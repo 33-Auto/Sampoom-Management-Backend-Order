@@ -4,8 +4,10 @@ import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
+import com.sampoom.backend.api.order.entity.EventOutbox;
+import com.sampoom.backend.api.order.event.ToWarehouseEvent;
+import com.sampoom.backend.api.order.repository.EventOutboxRepository;
 import com.sampoom.backend.api.order.repository.OrderRepository;
-import com.sampoom.backend.api.order.sender.OrderSender;
 import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -22,7 +25,7 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderPartService orderPartService;
-    private final OrderSender orderSender;
+    private final EventOutboxRepository eventOutboxRepository;
 
     @Transactional
     public OrderResDto createOrder(OrderReqDto orderReqDto) {
@@ -31,9 +34,20 @@ public class OrderService {
                 .branch(orderReqDto.getBranch())
                 .status(OrderStatus.PENDING)
                 .build();
-
-        orderRepository.save(newOrder);
+        orderRepository.saveAndFlush(newOrder);
         orderPartService.saveAllParts(newOrder.getId(), orderReqDto.getItems());
+
+        EventOutbox newEventOutbox = EventOutbox.builder()
+                .topic("sales-event")
+                .payload(ToWarehouseEvent.builder()
+                        .orderId(newOrder.getId())
+                        .branch(orderReqDto.getBranch())
+                        .items(orderReqDto.getItems())
+                        .version(newOrder.getVersion())
+                        .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
+                        .build())
+                .build();
+        eventOutboxRepository.saveAndFlush(newEventOutbox);
 
         return OrderResDto.builder()
                 .id(newOrder.getId())
@@ -42,22 +56,6 @@ public class OrderService {
                 .status(OrderStatus.PENDING)
                 .items(orderReqDto.getItems())
                 .build();
-    }
-
-    public void sendOrderToDownstream(OrderReqDto orderReqDto) {
-        if (orderReqDto.getRequester() == Requester.AGENCY) {
-            ToWarehouseDto toWarehouseDto = ToWarehouseDto.builder()
-                    .branch(orderReqDto.getBranch())
-                    .items(orderReqDto.getItems())
-                    .build();
-            orderSender.sendOrderToWarehouse(toWarehouseDto);
-        } else if (orderReqDto.getRequester() == Requester.WAREHOUSE) {
-            ToFactoryDto toFactoryDto = ToFactoryDto.builder()
-                    .branch(orderReqDto.getBranch())
-                    .items(orderReqDto.getItems())
-                    .build();
-            orderSender.sendOrderToFactory(toFactoryDto);
-        }
     }
 
     @Transactional(readOnly = true)

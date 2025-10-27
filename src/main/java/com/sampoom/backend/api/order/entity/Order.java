@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter @Setter
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,10 +18,18 @@ public class Order extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     private Requester requester;
+
     private String branch;
+    private String warehouse;
+
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<OrderPart> orderParts = new ArrayList<>();
+
+    @Version
+    private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
 }

@@ -21,9 +21,8 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<ApiResponse<OrderResDto>> createOrder(@RequestBody OrderReqDto order) {
         OrderResDto orderResDto = orderService.createOrder(order);
-        orderService.sendOrderToDownstream(order);
 
-        return ApiResponse.success(SuccessStatus.OK, orderResDto);
+        return ApiResponse.success(SuccessStatus.CREATED, orderResDto);
     }
 
     @GetMapping("/{orderId}")
