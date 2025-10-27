@@ -3,7 +3,6 @@ package com.sampoom.backend.api.order.event;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.order.entity.EventOutbox;
 import com.sampoom.backend.api.order.entity.EventStatus;
-import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.repository.EventOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
