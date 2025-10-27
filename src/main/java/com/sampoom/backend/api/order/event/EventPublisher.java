@@ -6,6 +6,8 @@ import com.sampoom.backend.api.order.entity.EventStatus;
 import com.sampoom.backend.api.order.repository.EventOutboxRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -19,11 +21,13 @@ public class EventPublisher {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final EventOutboxRepository eventOutboxRepository;
     private final ObjectMapper objectMapper;
+    private static final int BATCH_SIZE = 100;
 
     @Scheduled(fixedDelay = 2000)
     public void publishPendingEvents() {
-        List<EventOutbox> pendingEvents = eventOutboxRepository.findByEventStatus(EventStatus.PENDING);
-        List<EventOutbox> retryEvents = eventOutboxRepository.findByEventStatus(EventStatus.FAILED);
+        Pageable pageable = PageRequest.of(0, BATCH_SIZE);
+        List<EventOutbox> pendingEvents = eventOutboxRepository.findByEventStatus(EventStatus.PENDING, pageable);
+        List<EventOutbox> retryEvents = eventOutboxRepository.findByEventStatus(EventStatus.FAILED, pageable);
         pendingEvents.addAll(retryEvents);
 
         for (EventOutbox event : pendingEvents) {

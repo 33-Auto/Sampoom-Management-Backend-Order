@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Getter
@@ -16,4 +17,6 @@ public class ToWarehouseEvent {
     private Long orderId;
     private String branch;
     private List<ItemDto> items;
+    private Long version;
+    private OffsetDateTime sourceUpdatedAt;
 }

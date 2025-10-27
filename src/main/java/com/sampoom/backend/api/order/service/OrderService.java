@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,8 @@ public class OrderService {
                         .orderId(newOrder.getId())
                         .branch(orderReqDto.getBranch())
                         .items(orderReqDto.getItems())
+                        .version(newOrder.getVersion())
+                        .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
                         .build())
                 .build();
         eventOutboxRepository.saveAndFlush(newEventOutbox);

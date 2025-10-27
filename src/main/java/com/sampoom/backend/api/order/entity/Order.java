@@ -29,4 +29,7 @@ public class Order extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<OrderPart> orderParts = new ArrayList<>();
+
+    @Version
+    private Long version; // JPA가 자동 관리 (낙관적 락 + 자동 증가)
 }
