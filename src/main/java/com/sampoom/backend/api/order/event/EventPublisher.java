@@ -30,18 +30,18 @@ public class EventPublisher {
             try {
                 kafkaTemplate.send(event.getTopic(), objectMapper.writeValueAsString(event.getPayload()))
                         .thenAccept(result -> {
-                            event.setEventStatus(EventStatus.PUBLISHED);
+                            event.markAsPublished();
                             eventOutboxRepository.save(event);
                             log.info("✅ Sent outbox event: {}", event.getId());
                         })
                         .exceptionally(ex -> {
-                            event.setEventStatus(EventStatus.FAILED);
+                            event.markAsFailed();
                             eventOutboxRepository.save(event);
                             log.error("❌ Failed to send outbox event: {}", event.getId(), ex);
                             return null;
                         });
             } catch (Exception e) {
-                event.setEventStatus(EventStatus.FAILED);
+                event.markAsFailed();
                 eventOutboxRepository.save(event);
                 log.error("❌ Failed to serialize event: {}", event.getId(), e);
             }

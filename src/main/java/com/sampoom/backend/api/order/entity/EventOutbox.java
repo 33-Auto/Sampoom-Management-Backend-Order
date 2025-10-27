@@ -10,7 +10,6 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "event_outbox")
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,4 +28,12 @@ public class EventOutbox extends BaseTimeEntity {
     @Column(nullable = false)
     @Builder.Default
     private EventStatus eventStatus = EventStatus.PENDING;
+
+    public void markAsPublished() {
+        this.eventStatus = EventStatus.PUBLISHED;
+    }
+
+    public void markAsFailed() {
+        this.eventStatus = EventStatus.FAILED;
+    }
 }
