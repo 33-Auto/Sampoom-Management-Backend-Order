@@ -2,7 +2,6 @@ package com.sampoom.backend.api.order.service;
 
 import com.sampoom.backend.api.order.dto.ItemDto;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
