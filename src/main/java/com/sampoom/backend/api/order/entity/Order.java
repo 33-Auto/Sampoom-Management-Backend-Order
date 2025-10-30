@@ -9,6 +9,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +23,9 @@ public class Order extends BaseTimeEntity {
     private Requester requester;
 
     private String branch;
-    private String warehouse;
+
+    private Long warehouseId;
+    private String warehouseName;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
