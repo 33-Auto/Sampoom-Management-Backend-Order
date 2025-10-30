@@ -88,6 +88,7 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void updateOrderStatus(OrderStatusEvent orderStatusEvent) {
         Order order = orderRepository.findById(orderStatusEvent.getOrderId()).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
@@ -97,6 +98,7 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    @Transactional
     public void allocateWarehouse(OrderWarehouseEvent orderWarehouseEvent) {
         Order order = orderRepository.findById(orderWarehouseEvent.getOrderId()).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
