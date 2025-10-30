@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -18,6 +19,7 @@ public class EventConsumer {
     private final ObjectMapper objectMapper;
     private final OrderService orderService;
 
+    @Transactional
     @KafkaListener(topics = "order-status-events")
     public void consumeOrderStatus(String message) {
         try {
@@ -38,6 +40,7 @@ public class EventConsumer {
         }
     }
 
+    @Transactional
     @KafkaListener(topics = "order-warehouse-events")
     public void consumeWarehouseEvent(String message) {
         try {
