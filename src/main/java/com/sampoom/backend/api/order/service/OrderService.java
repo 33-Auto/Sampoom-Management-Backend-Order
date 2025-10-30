@@ -39,7 +39,7 @@ public class OrderService {
         orderPartService.saveAllParts(newOrder.getId(), orderReqDto.getItems());
 
         EventOutbox newEventOutbox = EventOutbox.builder()
-                .topic("sales-event")
+                .topic("sales-events")
                 .payload(ToWarehouseEvent.builder()
                         .orderId(newOrder.getId())
                         .branch(orderReqDto.getBranch())
