@@ -9,6 +9,7 @@ import com.sampoom.backend.api.order.event.ToWarehouseEvent;
 import com.sampoom.backend.api.order.repository.EventOutboxRepository;
 import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.common.exception.BadRequestException;
+import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class OrderService {
         orderPartService.saveAllParts(newOrder.getId(), orderReqDto.getItems());
 
         EventOutbox newEventOutbox = EventOutbox.builder()
-                .topic("sales-event")
+                .topic("sales-events")
                 .payload(ToWarehouseEvent.builder()
                         .orderId(newOrder.getId())
                         .branch(orderReqDto.getBranch())
@@ -85,6 +86,27 @@ public class OrderService {
                                 .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateOrderStatus(OrderStatusEvent orderStatusEvent) {
+        Order order = orderRepository.findById(orderStatusEvent.getOrderId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
+        );
+
+        order.setStatus(orderStatusEvent.getOrderStatus());
+        orderRepository.save(order);
+    }
+
+    @Transactional
+    public void allocateWarehouse(OrderWarehouseEvent orderWarehouseEvent) {
+        Order order = orderRepository.findById(orderWarehouseEvent.getOrderId()).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
+        );
+
+        order.setWarehouseId(orderWarehouseEvent.getWarehouseId());
+        order.setWarehouseName(orderWarehouseEvent.getWarehouseName());
+        orderRepository.save(order);
     }
 
 }
