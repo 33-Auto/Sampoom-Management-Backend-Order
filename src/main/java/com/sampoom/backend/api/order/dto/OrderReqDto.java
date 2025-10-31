@@ -12,7 +12,6 @@ import java.util.List;
 @ToString
 @Builder
 public class OrderReqDto {
-    private Requester requester;
     private String branch;
     private List<ItemDto> items;
 }

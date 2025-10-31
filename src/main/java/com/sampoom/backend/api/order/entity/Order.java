@@ -19,9 +19,6 @@ public class Order extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    private Requester requester;
-
     private String branch;
 
     private Long warehouseId;

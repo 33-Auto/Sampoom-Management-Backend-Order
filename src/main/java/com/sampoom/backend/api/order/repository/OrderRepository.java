@@ -13,8 +13,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             SELECT DISTINCT o
             FROM Order o
             LEFT JOIN FETCH o.orderParts
-            WHERE o.requester = :requester
-                AND (:branch IS NULL OR o.branch = :branch)
+            WHERE (:branch IS NULL OR o.branch = :branch)
             """)
-    List<Order> findWithItemsByRequesterAndBranch(@Param("requester") Requester requester, @Param("branch") String branch);
+    List<Order> findWithItemsByBranch(@Param("branch") String branch);
 }
