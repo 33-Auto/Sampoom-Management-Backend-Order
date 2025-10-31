@@ -88,6 +88,21 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    public OrderResDto getOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
+        );
+
+        return OrderResDto.builder()
+                .id(order.getId())
+                .requester(order.getRequester())
+                .branch(order.getBranch())
+                .items(order.getOrderParts().stream().map(
+                        op -> new ItemDto(op.getCode(), op.getQuantity()))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
     @Transactional
     public void updateOrderStatus(OrderStatusEvent orderStatusEvent) {
         Order order = orderRepository.findById(orderStatusEvent.getOrderId()).orElseThrow(

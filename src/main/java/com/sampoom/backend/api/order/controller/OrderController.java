@@ -27,25 +27,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public ResponseEntity<ApiResponse<OrderResDto>> getOrder(@PathVariable Long orderId) {
-        List<ItemDto> items = List.of(
-                ItemDto.builder()
-                        .code("ENG-01-001")
-                        .quantity(2)
-                        .build(),
-                ItemDto.builder()
-                        .code("ENG-01-002")
-                        .quantity(3)
-                        .build()
-        );
-
-        OrderResDto orderResDto = OrderResDto.builder()
-                .id(orderId)
-                .items(items)
-                .requester(Requester.WAREHOUSE)
-                .branch("강원도")
-                .build();
-
-        return ApiResponse.success(SuccessStatus.OK, orderResDto);
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrder(orderId));
     }
 
     @GetMapping("/requested")
