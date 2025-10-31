@@ -2,10 +2,8 @@ package com.sampoom.backend.api.order.dto;
 
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.util.List;
 
@@ -14,7 +12,6 @@ import java.util.List;
 @Builder
 public class OrderResDto {
     private Long id;
-    private Requester requester;
     private String branch;
     private List<ItemDto> items;
     private OrderStatus status;
