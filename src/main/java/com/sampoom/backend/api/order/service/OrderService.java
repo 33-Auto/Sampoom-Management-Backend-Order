@@ -90,7 +90,7 @@ public class OrderService {
 
     private String makeOrderName() {
         String uuidPart = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
-        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String today = LocalDate.now(ZoneOffset.ofHours(9)).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         return "ORD-" + today + "-" + uuidPart;
     }
 
