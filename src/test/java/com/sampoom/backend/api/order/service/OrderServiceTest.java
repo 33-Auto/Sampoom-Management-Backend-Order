@@ -1,10 +1,9 @@
 package com.sampoom.backend.api.order.service;
 
-import com.sampoom.backend.api.order.dto.ItemDto;
+import com.sampoom.backend.api.order.dto.ItemPartDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.OrderResDto;
 import com.sampoom.backend.api.order.dto.ToWarehouseDto;
-import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.Requester;
 import com.sampoom.backend.api.order.repository.OrderRepository;
@@ -20,7 +19,6 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -36,12 +34,12 @@ public class OrderServiceTest {
     void should_create_order() {
         Requester requester = Requester.AGENCY;
         String branch = "branch";
-        List<ItemDto> items = List.of(
-                ItemDto.builder()
+        List<ItemPartDto> items = List.of(
+                ItemPartDto.builder()
                         .code("ENG-01-001")
                         .quantity(2)
                         .build(),
-                ItemDto.builder()
+                ItemPartDto.builder()
                         .code("ENG-01-002")
                         .quantity(3)
                         .build()

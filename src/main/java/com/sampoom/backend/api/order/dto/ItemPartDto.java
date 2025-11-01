@@ -5,7 +5,10 @@ import lombok.*;
 @Getter @Setter
 @ToString @Builder
 @AllArgsConstructor
-public class ItemDto {
+@NoArgsConstructor
+public class ItemPartDto {
+    private Long partId;
+    private String name;
     private String code;
     private Integer quantity;
 }

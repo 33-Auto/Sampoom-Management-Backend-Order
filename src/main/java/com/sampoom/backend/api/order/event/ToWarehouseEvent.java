@@ -1,6 +1,7 @@
 package com.sampoom.backend.api.order.event;
 
-import com.sampoom.backend.api.order.dto.ItemDto;
+import com.sampoom.backend.api.order.dto.ItemBriefDto;
+import com.sampoom.backend.api.order.dto.ItemPartDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import java.util.List;
 public class ToWarehouseEvent {
     private Long orderId;
     private String branch;
-    private List<ItemDto> items;
+    private List<ItemBriefDto> items;
     private Long version;
     private OffsetDateTime sourceUpdatedAt;
 }

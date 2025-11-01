@@ -2,6 +2,7 @@ package com.sampoom.backend.api.order.service;
 
 import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
+import com.sampoom.backend.api.order.entity.OrderPart;
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.EventOutbox;
 import com.sampoom.backend.api.order.event.ToWarehouseEvent;
@@ -10,13 +11,17 @@ import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Locale;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,18 +34,28 @@ public class OrderService {
     @Transactional
     public OrderResDto createOrder(OrderReqDto orderReqDto) {
         Order newOrder = Order.builder()
-                .branch(orderReqDto.getBranch())
+                .orderNumber(this.makeOrderName())
+                .branch(orderReqDto.getAgencyName())
                 .status(OrderStatus.PENDING)
                 .build();
         orderRepository.saveAndFlush(newOrder);
         orderPartService.saveAllParts(newOrder.getId(), orderReqDto.getItems());
 
+        List<ItemBriefDto> briefDtos = orderReqDto.getItems().stream()
+                .flatMap(c -> c.getGroups().stream())
+                .flatMap(g -> g.getParts().stream())
+                .map(p -> ItemBriefDto.builder()
+                        .code(p.getCode())
+                        .quantity(p.getQuantity())
+                        .build())
+                .toList();
+
         EventOutbox newEventOutbox = EventOutbox.builder()
                 .topic("sales-events")
                 .payload(ToWarehouseEvent.builder()
                         .orderId(newOrder.getId())
-                        .branch(orderReqDto.getBranch())
-                        .items(orderReqDto.getItems())
+                        .branch(orderReqDto.getAgencyName())
+                        .items(briefDtos)
                         .version(newOrder.getVersion())
                         .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
                         .build())
@@ -48,43 +63,93 @@ public class OrderService {
         eventOutboxRepository.saveAndFlush(newEventOutbox);
 
         return OrderResDto.builder()
-                .id(newOrder.getId())
-                .branch(orderReqDto.getBranch())
+                .orderId(newOrder.getId())
+                .orderNumber(newOrder.getOrderNumber())
+                .agencyName(orderReqDto.getAgencyName())
                 .status(OrderStatus.PENDING)
                 .items(orderReqDto.getItems())
+                .createdAt(newOrder.getCreatedAt().toString())
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResDto> getOrders(String from) {
+    public Page<OrderResDto> getOrders(String from, int page, int size) {
         final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
-        List<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch, pageable);
 
-        return orders.stream()
-                .map(order -> OrderResDto.builder()
-                        .id(order.getId())
-                        .branch(order.getBranch())
-                        .status(order.getStatus())
-                        .items(order.getOrderParts().stream()
-                                .map(op -> new ItemDto(op.getCode(), op.getQuantity()))
-                                .collect(Collectors.toList()))
-                        .build())
-                .collect(Collectors.toList());
+        return orders.map(order -> OrderResDto.builder()
+                .orderId(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .agencyName(order.getBranch())
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt().toString())
+                .items(this.convertOrderItems(order.getOrderParts()))
+                .build());
     }
 
+    private String makeOrderName() {
+        String uuidPart = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String today = LocalDate.now(ZoneOffset.ofHours(9)).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return "ORD-" + today + "-" + uuidPart;
+    }
+
+    @Transactional(readOnly = true)
     public OrderResDto getOrder(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
         );
 
         return OrderResDto.builder()
-                .id(order.getId())
-                .branch(order.getBranch())
+                .orderId(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .agencyName(order.getBranch())
                 .status(order.getStatus())
-                .items(order.getOrderParts().stream().map(
-                        op -> new ItemDto(op.getCode(), op.getQuantity()))
-                        .collect(Collectors.toList()))
+                .createdAt(order.getCreatedAt().toString())
+                .items(this.convertOrderItems(order.getOrderParts()))
                 .build();
+    }
+
+    private List<ItemCategoryDto> convertOrderItems(List<OrderPart> orderParts) {
+        Map<Long, ItemCategoryDto> categoryMap = new LinkedHashMap<>();
+
+        for (OrderPart part : orderParts) {
+            // 카테고리 처리
+            ItemCategoryDto category = categoryMap.computeIfAbsent(
+                    part.getCategoryId(),
+                    cid -> new ItemCategoryDto(
+                            cid,
+                            part.getCategoryName(),
+                            new ArrayList<>()
+                    )
+            );
+
+            // 그룹 처리
+            ItemGroupDto group = category.getGroups().stream()
+                    .filter(g -> g.getGroupId().equals(part.getGroupId()))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        ItemGroupDto newGroup = new ItemGroupDto(
+                                part.getGroupId(),
+                                part.getGroupName(),
+                                new ArrayList<>()
+                        );
+                        category.getGroups().add(newGroup);
+                        return newGroup;
+                    });
+
+            // 파트 추가
+            group.getParts().add(
+                    new ItemPartDto(
+                            part.getPartId(),
+                            part.getName(),
+                            part.getCode(),
+                            part.getQuantity()
+                    )
+            );
+        }
+
+        return new ArrayList<>(categoryMap.values());
     }
 
     @Transactional

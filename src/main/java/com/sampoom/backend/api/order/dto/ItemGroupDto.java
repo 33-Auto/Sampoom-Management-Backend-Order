@@ -9,9 +9,10 @@ import java.util.List;
 
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ToWarehouseDto {
-    private String branch;
-    private List<ItemPartDto> items;
+@AllArgsConstructor
+public class ItemGroupDto {
+    private Long groupId;
+    private String groupName;
+    private List<ItemPartDto> parts;
 }
