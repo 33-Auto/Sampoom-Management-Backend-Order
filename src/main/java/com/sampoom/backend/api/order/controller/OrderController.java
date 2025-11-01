@@ -6,6 +6,7 @@ import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,9 @@ public class OrderController {
     }
 
     @GetMapping("/requested")
-    public ResponseEntity<ApiResponse<List<OrderResDto>>> getRequestedOrders(@RequestParam String from) {
-        return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from));
+    public ResponseEntity<ApiResponse<Page<OrderResDto>>> getRequestedOrders(@RequestParam String from,
+                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "20") int size) {
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from, page, size));
     }
 }

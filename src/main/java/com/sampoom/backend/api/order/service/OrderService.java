@@ -11,6 +11,9 @@ import com.sampoom.backend.api.order.repository.OrderRepository;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -70,20 +73,19 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResDto> getOrders(String from) {
+    public Page<OrderResDto> getOrders(String from, int page, int size) {
         final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
-        List<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch, pageable);
 
-        return orders.stream()
-                .map(order -> OrderResDto.builder()
-                        .orderId(order.getId())
-                        .orderNumber(order.getOrderNumber())
-                        .agencyName(order.getBranch())
-                        .status(order.getStatus())
-                        .createdAt(order.getCreatedAt().toString())
-                        .items(this.convertOrderItems(order.getOrderParts()))
-                        .build())
-                .collect(Collectors.toList());
+        return orders.map(order -> OrderResDto.builder()
+                .orderId(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .agencyName(order.getBranch())
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt().toString())
+                .items(this.convertOrderItems(order.getOrderParts()))
+                .build());
     }
 
     private String makeOrderName() {
