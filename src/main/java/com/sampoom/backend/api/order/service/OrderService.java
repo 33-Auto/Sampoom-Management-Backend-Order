@@ -159,9 +159,11 @@ public class OrderService {
                 () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
         );
 
-        if (order.getStatus() == OrderStatus.SHIPPING) {
+        if (order.getStatus() == OrderStatus.SHIPPING)
             throw new BadRequestException(ErrorStatus.SHIPPING_CANT_CANCEL.getMessage());
-        }
+        else if (order.getStatus() == OrderStatus.CANCELED)
+            throw new BadRequestException(ErrorStatus.ALREADY_CANCELED.getMessage());
+
         order.setStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
 
