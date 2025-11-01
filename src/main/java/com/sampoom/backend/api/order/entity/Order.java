@@ -19,6 +19,10 @@ public class Order extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
+    private String orderNumber;
+
+    @Column(nullable = false)
     private String branch;
 
     private Long warehouseId;

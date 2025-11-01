@@ -1,9 +1,7 @@
 package com.sampoom.backend.api.order.controller;
 
-import com.sampoom.backend.api.order.dto.ItemDto;
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.OrderResDto;
-import com.sampoom.backend.api.order.entity.Requester;
 import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;

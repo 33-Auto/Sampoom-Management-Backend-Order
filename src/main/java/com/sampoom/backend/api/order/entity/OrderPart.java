@@ -18,6 +18,12 @@ public class OrderPart {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    private Long categoryId;
+    private String categoryName;
+    private Long groupId;
+    private String groupName;
+    private Long partId;
     private String code;
+    private String name;
     private Integer quantity;
 }

@@ -5,13 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class ToWarehouseDto {
-    private String branch;
-    private List<ItemPartDto> items;
+@AllArgsConstructor
+public class ItemBriefDto {
+    private String code;
+    private Integer quantity;
 }

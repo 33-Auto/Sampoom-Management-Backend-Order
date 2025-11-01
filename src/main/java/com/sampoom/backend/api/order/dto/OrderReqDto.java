@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.order.dto;
 
-import com.sampoom.backend.api.order.entity.Requester;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +11,6 @@ import java.util.List;
 @ToString
 @Builder
 public class OrderReqDto {
-    private String branch;
-    private List<ItemDto> items;
+    private String agencyName;
+    private List<ItemCategoryDto> items;
 }

@@ -11,7 +11,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ToWarehouseDto {
-    private String branch;
-    private List<ItemPartDto> items;
+public class ItemCategoryDto {
+    private Long categoryId;
+    private String categoryName;
+    List<ItemGroupDto> groups;
 }
