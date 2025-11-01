@@ -5,9 +5,11 @@ import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderPart;
 import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.entity.EventOutbox;
+import com.sampoom.backend.api.order.event.OrderCancelEvent;
 import com.sampoom.backend.api.order.event.ToWarehouseEvent;
 import com.sampoom.backend.api.order.repository.EventOutboxRepository;
 import com.sampoom.backend.api.order.repository.OrderRepository;
+import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,6 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -150,6 +151,38 @@ public class OrderService {
         }
 
         return new ArrayList<>(categoryMap.values());
+    }
+
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
+        );
+
+        if (order.getStatus() == OrderStatus.SHIPPING)
+            throw new BadRequestException(ErrorStatus.SHIPPING_CANT_CANCEL.getMessage());
+        else if (order.getStatus() == OrderStatus.CANCELED)
+            throw new BadRequestException(ErrorStatus.ALREADY_CANCELED.getMessage());
+        else if (order.getStatus() == OrderStatus.COMPLETED)
+            throw new BadRequestException(ErrorStatus.ALREADY_COMPLETED.getMessage());
+
+        order.setStatus(OrderStatus.CANCELED);
+        orderRepository.save(order);
+
+        EventOutbox eventOutbox = EventOutbox.builder()
+                .topic("order-cancel-events")
+                .payload(OrderCancelEvent.builder()
+                        .orderId(order.getId())
+                        .warehouseId(order.getWarehouseId())
+                        .parts(order.getOrderParts().stream()
+                                .map(op -> ItemBriefDto.builder()
+                                        .code(op.getCode())
+                                        .quantity(op.getQuantity())
+                                        .build())
+                                .toList())
+                        .build())
+                .build();
+        eventOutboxRepository.save(eventOutbox);
     }
 
     @Transactional
