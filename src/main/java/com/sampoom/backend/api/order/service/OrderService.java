@@ -164,7 +164,7 @@ public class OrderService {
         else if (order.getStatus() == OrderStatus.CANCELED)
             throw new BadRequestException(ErrorStatus.ALREADY_CANCELED.getMessage());
         else if (order.getStatus() == OrderStatus.COMPLETED)
-            throw new BadRequestException(ErrorStatus.ALREADY_COMPLETED_ORDER.getMessage());
+            throw new BadRequestException(ErrorStatus.ALREADY_COMPLETED.getMessage());
 
         order.setStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
