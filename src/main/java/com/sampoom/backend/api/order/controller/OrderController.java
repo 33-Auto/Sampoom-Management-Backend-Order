@@ -29,6 +29,12 @@ public class OrderController {
         return ApiResponse.success(SuccessStatus.OK, orderService.getOrder(orderId));
     }
 
+    @PatchMapping("/cancel/{orderId}")
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(@PathVariable Long orderId) {
+        orderService.cancelOrder(orderId);
+        return ApiResponse.success_only(SuccessStatus.OK);
+    }
+
     @GetMapping("/requested")
     public ResponseEntity<ApiResponse<Page<OrderResDto>>> getRequestedOrders(@RequestParam String from,
                                                                              @RequestParam(defaultValue = "0") int page,
