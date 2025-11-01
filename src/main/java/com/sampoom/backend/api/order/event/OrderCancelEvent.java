@@ -15,5 +15,5 @@ import java.util.List;
 public class OrderCancelEvent {
     private Long orderId;
     private Long warehouseId;
-    List<ItemBriefDto> parts;
+    private List<ItemBriefDto> parts;
 }
