@@ -1,5 +1,6 @@
 package com.sampoom.backend.api.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
@@ -36,50 +37,52 @@ public class OrderService {
 
     @Transactional
     public OrderResDto createOrder(OrderReqDto orderReqDto) {
+        Order newOrder = Order.builder()
+                .orderNumber(this.makeOrderName())
+                .branch(orderReqDto.getAgencyName())
+                .status(OrderStatus.PENDING)
+                .build();
+        orderRepository.saveAndFlush(newOrder);
+        orderPartService.saveAllParts(newOrder.getId(), orderReqDto.getItems());
+
+        List<ItemBriefDto> briefDtos = orderReqDto.getItems().stream()
+                .flatMap(c -> c.getGroups().stream())
+                .flatMap(g -> g.getParts().stream())
+                .map(p -> ItemBriefDto.builder()
+                        .code(p.getCode())
+                        .quantity(p.getQuantity())
+                        .build())
+                .toList();
+
+        ToWarehouseEvent toWarehouseEvent = ToWarehouseEvent.builder()
+                .orderId(newOrder.getId())
+                .branch(orderReqDto.getAgencyName())
+                .items(briefDtos)
+                .version(newOrder.getVersion())
+                .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
+                .build();
+
+        String json;
         try {
-            Order newOrder = Order.builder()
-                    .orderNumber(this.makeOrderName())
-                    .branch(orderReqDto.getAgencyName())
-                    .status(OrderStatus.PENDING)
-                    .build();
-            orderRepository.saveAndFlush(newOrder);
-            orderPartService.saveAllParts(newOrder.getId(), orderReqDto.getItems());
-
-            List<ItemBriefDto> briefDtos = orderReqDto.getItems().stream()
-                    .flatMap(c -> c.getGroups().stream())
-                    .flatMap(g -> g.getParts().stream())
-                    .map(p -> ItemBriefDto.builder()
-                            .code(p.getCode())
-                            .quantity(p.getQuantity())
-                            .build())
-                    .toList();
-
-            ToWarehouseEvent toWarehouseEvent = ToWarehouseEvent.builder()
-                    .orderId(newOrder.getId())
-                    .branch(orderReqDto.getAgencyName())
-                    .items(briefDtos)
-                    .version(newOrder.getVersion())
-                    .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
-                    .build();
-            String json = objectMapper.writeValueAsString(toWarehouseEvent);
-
-            EventOutbox newEventOutbox = EventOutbox.builder()
-                    .topic("sales-events")
-                    .payload(json)
-                    .build();
-            eventOutboxRepository.saveAndFlush(newEventOutbox);
-
-            return OrderResDto.builder()
-                    .orderId(newOrder.getId())
-                    .orderNumber(newOrder.getOrderNumber())
-                    .agencyName(orderReqDto.getAgencyName())
-                    .status(OrderStatus.PENDING)
-                    .items(orderReqDto.getItems())
-                    .createdAt(newOrder.getCreatedAt().toString())
-                    .build();
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
+            json = objectMapper.writeValueAsString(toWarehouseEvent);
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e);
         }
+
+        EventOutbox newEventOutbox = EventOutbox.builder()
+                .topic("sales-events")
+                .payload(json)
+                .build();
+        eventOutboxRepository.saveAndFlush(newEventOutbox);
+
+        return OrderResDto.builder()
+                .orderId(newOrder.getId())
+                .orderNumber(newOrder.getOrderNumber())
+                .agencyName(orderReqDto.getAgencyName())
+                .status(OrderStatus.PENDING)
+                .items(orderReqDto.getItems())
+                .createdAt(newOrder.getCreatedAt().toString())
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -163,41 +166,43 @@ public class OrderService {
 
     @Transactional
     public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
+        );
+
+        if (order.getStatus() == OrderStatus.SHIPPING)
+            throw new BadRequestException(ErrorStatus.SHIPPING_CANT_CANCEL.getMessage());
+        else if (order.getStatus() == OrderStatus.CANCELED)
+            throw new BadRequestException(ErrorStatus.ALREADY_CANCELED.getMessage());
+        else if (order.getStatus() == OrderStatus.COMPLETED)
+            throw new BadRequestException(ErrorStatus.ALREADY_COMPLETED.getMessage());
+
+        order.setStatus(OrderStatus.CANCELED);
+        orderRepository.save(order);
+
+        OrderCancelEvent orderCancelEvent = OrderCancelEvent.builder()
+                .orderId(order.getId())
+                .warehouseId(order.getWarehouseId())
+                .parts(order.getOrderParts().stream()
+                        .map(op -> ItemBriefDto.builder()
+                                .code(op.getCode())
+                                .quantity(op.getQuantity())
+                                .build())
+                        .toList())
+                .build();
+
+        String json;
         try {
-            Order order = orderRepository.findById(orderId).orElseThrow(
-                    () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
-            );
-
-            if (order.getStatus() == OrderStatus.SHIPPING)
-                throw new BadRequestException(ErrorStatus.SHIPPING_CANT_CANCEL.getMessage());
-            else if (order.getStatus() == OrderStatus.CANCELED)
-                throw new BadRequestException(ErrorStatus.ALREADY_CANCELED.getMessage());
-            else if (order.getStatus() == OrderStatus.COMPLETED)
-                throw new BadRequestException(ErrorStatus.ALREADY_COMPLETED.getMessage());
-
-            order.setStatus(OrderStatus.CANCELED);
-            orderRepository.save(order);
-
-            OrderCancelEvent orderCancelEvent = OrderCancelEvent.builder()
-                    .orderId(order.getId())
-                    .warehouseId(order.getWarehouseId())
-                    .parts(order.getOrderParts().stream()
-                            .map(op -> ItemBriefDto.builder()
-                                    .code(op.getCode())
-                                    .quantity(op.getQuantity())
-                                    .build())
-                            .toList())
-                    .build();
-            String json = objectMapper.writeValueAsString(orderCancelEvent);
-
-            EventOutbox eventOutbox = EventOutbox.builder()
-                    .topic("order-cancel-events")
-                    .payload(json)
-                    .build();
-            eventOutboxRepository.save(eventOutbox);
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
+            json = objectMapper.writeValueAsString(orderCancelEvent);
+        }  catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
         }
+
+        EventOutbox eventOutbox = EventOutbox.builder()
+                .topic("order-cancel-events")
+                .payload(json)
+                .build();
+        eventOutboxRepository.save(eventOutbox);
     }
 
     @Transactional
