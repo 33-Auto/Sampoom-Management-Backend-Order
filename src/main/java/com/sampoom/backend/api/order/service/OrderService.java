@@ -83,9 +83,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResDto> getOrders(String from, int page, int size) {
+    public Page<OrderResDto> getOrders(String from, Pageable pageable) {
         final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
-        Pageable pageable = PageRequest.of(page, size);
         Page<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch, pageable);
 
         return orders.map(order -> OrderResDto.builder()
