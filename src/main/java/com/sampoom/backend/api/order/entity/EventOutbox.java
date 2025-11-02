@@ -23,7 +23,7 @@ public class EventOutbox extends BaseTimeEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
-    private Object payload; // 이벤트 객체 (DB에 JSONB로 저장)
+    private String payload; // 이벤트 객체 (DB에 JSONB로 저장)
 
     @Column(nullable = false)
     @Builder.Default

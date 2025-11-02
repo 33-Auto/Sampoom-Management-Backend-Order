@@ -1,5 +1,7 @@
 package com.sampoom.backend.api.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderPart;
@@ -31,6 +33,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderPartService orderPartService;
     private final EventOutboxRepository eventOutboxRepository;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public OrderResDto createOrder(OrderReqDto orderReqDto) {
@@ -51,15 +54,24 @@ public class OrderService {
                         .build())
                 .toList();
 
+        ToWarehouseEvent toWarehouseEvent = ToWarehouseEvent.builder()
+                .orderId(newOrder.getId())
+                .branch(orderReqDto.getAgencyName())
+                .items(briefDtos)
+                .version(newOrder.getVersion())
+                .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
+                .build();
+
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(toWarehouseEvent);
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e);
+        }
+
         EventOutbox newEventOutbox = EventOutbox.builder()
                 .topic("sales-events")
-                .payload(ToWarehouseEvent.builder()
-                        .orderId(newOrder.getId())
-                        .branch(orderReqDto.getAgencyName())
-                        .items(briefDtos)
-                        .version(newOrder.getVersion())
-                        .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
-                        .build())
+                .payload(json)
                 .build();
         eventOutboxRepository.saveAndFlush(newEventOutbox);
 
@@ -74,9 +86,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResDto> getOrders(String from, int page, int size) {
+    public Page<OrderResDto> getOrders(String from, Pageable pageable) {
         final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
-        Pageable pageable = PageRequest.of(page, size);
         Page<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch, pageable);
 
         return orders.map(order -> OrderResDto.builder()
@@ -169,18 +180,27 @@ public class OrderService {
         order.setStatus(OrderStatus.CANCELED);
         orderRepository.save(order);
 
+        OrderCancelEvent orderCancelEvent = OrderCancelEvent.builder()
+                .orderId(order.getId())
+                .warehouseId(order.getWarehouseId())
+                .parts(order.getOrderParts().stream()
+                        .map(op -> ItemBriefDto.builder()
+                                .code(op.getCode())
+                                .quantity(op.getQuantity())
+                                .build())
+                        .toList())
+                .build();
+
+        String json;
+        try {
+            json = objectMapper.writeValueAsString(orderCancelEvent);
+        }  catch (JsonProcessingException e) {
+            throw new BadRequestException(ErrorStatus.FAIL_SERIALIZE.getMessage() + e.getMessage());
+        }
+
         EventOutbox eventOutbox = EventOutbox.builder()
                 .topic("order-cancel-events")
-                .payload(OrderCancelEvent.builder()
-                        .orderId(order.getId())
-                        .warehouseId(order.getWarehouseId())
-                        .parts(order.getOrderParts().stream()
-                                .map(op -> ItemBriefDto.builder()
-                                        .code(op.getCode())
-                                        .quantity(op.getQuantity())
-                                        .build())
-                                .toList())
-                        .build())
+                .payload(json)
                 .build();
         eventOutboxRepository.save(eventOutbox);
     }

@@ -3,6 +3,7 @@ package com.sampoom.backend.api.order.entity;
 import com.sampoom.backend.common.entitiy.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class Order extends BaseTimeEntity {
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @BatchSize(size = 50)
     private List<OrderPart> orderParts = new ArrayList<>();
 
     @Version
