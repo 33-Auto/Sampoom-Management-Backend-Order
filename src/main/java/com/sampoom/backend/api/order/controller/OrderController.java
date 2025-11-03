@@ -41,4 +41,10 @@ public class OrderController {
                                                                              Pageable pageable) {
         return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from, pageable));
     }
+
+    @GetMapping("/warehouse/{warehouseId}")
+    public ResponseEntity<ApiResponse<Page<OrderResDto>>> getWarehouseOrders(@PathVariable Long warehouseId,
+                                                                             Pageable pageable) {
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrdersForWarehouse(warehouseId, pageable));
+    }
 }

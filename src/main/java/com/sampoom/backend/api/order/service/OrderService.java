@@ -100,6 +100,20 @@ public class OrderService {
                 .build());
     }
 
+    @Transactional(readOnly = true)
+    public Page<OrderResDto> getOrdersForWarehouse(Long warehouseId, Pageable pageable) {
+        Page<Order> orders = orderRepository.findWithItemsByWarehouseId(warehouseId, pageable);
+
+        return orders.map(order -> OrderResDto.builder()
+                .orderId(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .agencyName(order.getBranch())
+                .status(order.getStatus())
+                .createdAt(order.getCreatedAt().toString())
+                .items(this.convertOrderItems(order.getOrderParts()))
+                .build());
+    }
+
     private String makeOrderName() {
         String uuidPart = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String today = LocalDate.now(ZoneOffset.ofHours(9)).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -225,5 +239,4 @@ public class OrderService {
         order.setWarehouseName(orderWarehouseEvent.getWarehouseName());
         orderRepository.save(order);
     }
-
 }

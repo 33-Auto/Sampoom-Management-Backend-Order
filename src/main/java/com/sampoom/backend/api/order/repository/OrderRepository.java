@@ -14,4 +14,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             WHERE (:branch IS NULL OR o.branch = :branch)
             """)
     Page<Order> findWithItemsByBranch(@Param("branch") String branch, Pageable pageable);
+
+    @Query("""
+            SELECT o
+            FROM Order o
+            WHERE (:warehouseId IS NULL OR o.warehouseId = :warehouseId)
+            """)
+    Page<Order> findWithItemsByWarehouseId(@Param("warehouseId") Long warehouseId, Pageable pageable);
 }
