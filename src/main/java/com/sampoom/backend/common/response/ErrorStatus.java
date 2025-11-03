@@ -23,6 +23,7 @@ public enum ErrorStatus {
     NO_PART_REQUEST(HttpStatus.BAD_REQUEST, "요청에 부품 정보가 없습니다."),
     SHIPPING_CANT_CANCEL(HttpStatus.BAD_REQUEST, "배송 중인 주문은 취소할 수 없습니다."),
     ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "이미 취소된 주문입니다."),
+    ALREADY_ARRIVED(HttpStatus.BAD_REQUEST, "이미 배송 완료된 주문입니다"),
     ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 완료된 주문입니다."),
     FAIL_SERIALIZE(HttpStatus.BAD_REQUEST, "직렬화에 실패하였습니다."),
 

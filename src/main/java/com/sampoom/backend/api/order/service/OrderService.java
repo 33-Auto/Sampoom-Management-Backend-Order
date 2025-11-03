@@ -190,6 +190,8 @@ public class OrderService {
             throw new BadRequestException(ErrorStatus.SHIPPING_CANT_CANCEL.getMessage());
         else if (order.getStatus() == OrderStatus.CANCELED)
             throw new BadRequestException(ErrorStatus.ALREADY_CANCELED.getMessage());
+        else if (order.getStatus() == OrderStatus.ARRIVED)
+            throw new BadRequestException(ErrorStatus.ALREADY_ARRIVED.getMessage());
         else if (order.getStatus() == OrderStatus.COMPLETED)
             throw new BadRequestException(ErrorStatus.ALREADY_COMPLETED.getMessage());
 
@@ -219,6 +221,15 @@ public class OrderService {
                 .payload(json)
                 .build();
         eventOutboxRepository.save(eventOutbox);
+    }
+
+    @Transactional
+    public void completeOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
+        );
+        order.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(order);
     }
 
     @Transactional
