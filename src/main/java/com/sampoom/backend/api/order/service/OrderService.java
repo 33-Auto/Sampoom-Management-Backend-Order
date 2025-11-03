@@ -90,28 +90,25 @@ public class OrderService {
         final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
         Page<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch, pageable);
 
-        return orders.map(order -> OrderResDto.builder()
-                .orderId(order.getId())
-                .orderNumber(order.getOrderNumber())
-                .agencyName(order.getBranch())
-                .status(order.getStatus())
-                .createdAt(order.getCreatedAt().toString())
-                .items(this.convertOrderItems(order.getOrderParts()))
-                .build());
+        return orders.map(this::mapToOrderResDto);
     }
 
     @Transactional(readOnly = true)
     public Page<OrderResDto> getOrdersForWarehouse(Long warehouseId, Pageable pageable) {
         Page<Order> orders = orderRepository.findWithItemsByWarehouseId(warehouseId, pageable);
 
-        return orders.map(order -> OrderResDto.builder()
+        return orders.map(this::mapToOrderResDto);
+    }
+
+    private OrderResDto mapToOrderResDto(Order order) {
+        return OrderResDto.builder()
                 .orderId(order.getId())
                 .orderNumber(order.getOrderNumber())
                 .agencyName(order.getBranch())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt().toString())
                 .items(this.convertOrderItems(order.getOrderParts()))
-                .build());
+                .build();
     }
 
     private String makeOrderName() {
