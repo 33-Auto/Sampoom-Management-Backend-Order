@@ -37,6 +37,12 @@ public class OrderController {
         return ApiResponse.success_only(SuccessStatus.OK);
     }
 
+    @PatchMapping("/complete/{orderId}")
+    public ResponseEntity<ApiResponse<Void>> completeOrder(@PathVariable Long orderId) {
+        orderService.completeOrder(orderId);
+        return ApiResponse.success_only(SuccessStatus.OK);
+    }
+
     @GetMapping("/requested")
     public ResponseEntity<ApiResponse<Page<OrderResDto>>> getRequestedOrders(@RequestParam String from,
                                                                              @RequestParam(defaultValue = "0") int page,
