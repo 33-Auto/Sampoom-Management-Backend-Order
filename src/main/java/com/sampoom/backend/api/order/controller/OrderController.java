@@ -2,6 +2,7 @@ package com.sampoom.backend.api.order.controller;
 
 import com.sampoom.backend.api.order.dto.OrderReqDto;
 import com.sampoom.backend.api.order.dto.OrderResDto;
+import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
@@ -44,7 +45,9 @@ public class OrderController {
 
     @GetMapping("/warehouse/{warehouseId}")
     public ResponseEntity<ApiResponse<Page<OrderResDto>>> getWarehouseOrders(@PathVariable Long warehouseId,
+                                                                             @RequestParam(required = false) String from,
+                                                                             @RequestParam(required = false) OrderStatus status,
                                                                              Pageable pageable) {
-        return ApiResponse.success(SuccessStatus.OK, orderService.getOrdersForWarehouse(warehouseId, pageable));
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrdersForWarehouse(warehouseId, from, status, pageable));
     }
 }

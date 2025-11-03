@@ -94,8 +94,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResDto> getOrdersForWarehouse(Long warehouseId, Pageable pageable) {
-        Page<Order> orders = orderRepository.findWithItemsByWarehouseId(warehouseId, pageable);
+    public Page<OrderResDto> getOrdersForWarehouse(Long warehouseId, String from, OrderStatus status, Pageable pageable) {
+        Page<Order> orders = orderRepository.findOrdersForWarehouse(warehouseId, from, status, pageable);
 
         return orders.map(this::mapToOrderResDto);
     }
