@@ -22,7 +22,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         WHERE o.warehouseId = :warehouseId
         AND (:branch IS NULL OR o.branch = :branch)
         AND (:status IS NULL OR o.status = :status)
-        ORDER BY o.createdAt DESC
     """)
     Page<Order> findOrdersForWarehouse(
             @Param("warehouseId") Long warehouseId,

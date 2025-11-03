@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -86,16 +87,20 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResDto> getOrders(String from, Pageable pageable) {
+    public Page<OrderResDto> getOrders(String from, int page, int size) {
         final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch, pageable);
 
         return orders.map(this::mapToOrderResDto);
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResDto> getOrdersForWarehouse(Long warehouseId, String from, OrderStatus status, Pageable pageable) {
-        Page<Order> orders = orderRepository.findOrdersForWarehouse(warehouseId, from, status, pageable);
+    public Page<OrderResDto> getOrdersForWarehouse(Long warehouseId, String from, OrderStatus status,
+                                                   int page, int size) {
+        final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Order> orders = orderRepository.findOrdersForWarehouse(warehouseId, normalizedBranch, status, pageable);
 
         return orders.map(this::mapToOrderResDto);
     }

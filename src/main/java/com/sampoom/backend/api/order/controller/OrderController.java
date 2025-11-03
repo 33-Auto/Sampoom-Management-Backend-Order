@@ -39,15 +39,17 @@ public class OrderController {
 
     @GetMapping("/requested")
     public ResponseEntity<ApiResponse<Page<OrderResDto>>> getRequestedOrders(@RequestParam String from,
-                                                                             Pageable pageable) {
-        return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from, pageable));
+                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "20") int size) {
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrders(from, page, size));
     }
 
     @GetMapping("/warehouse/{warehouseId}")
     public ResponseEntity<ApiResponse<Page<OrderResDto>>> getWarehouseOrders(@PathVariable Long warehouseId,
                                                                              @RequestParam(required = false) String from,
                                                                              @RequestParam(required = false) OrderStatus status,
-                                                                             Pageable pageable) {
-        return ApiResponse.success(SuccessStatus.OK, orderService.getOrdersForWarehouse(warehouseId, from, status, pageable));
+                                                                             @RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "20") int size) {
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrdersForWarehouse(warehouseId, from, status, page, size));
     }
 }
