@@ -228,8 +228,13 @@ public class OrderService {
         Order order = orderRepository.findById(orderId).orElseThrow(
                 () -> new NotFoundException(ErrorStatus.ORDER_NOT_FOUND.getMessage())
         );
-        order.setStatus(OrderStatus.COMPLETED);
-        orderRepository.save(order);
+
+        if (order.getStatus() == OrderStatus.ARRIVED) {
+            order.setStatus(OrderStatus.COMPLETED);
+            orderRepository.save(order);
+        }
+        else
+            throw new BadRequestException(ErrorStatus.NOT_ARRIVED_ORDER.getMessage());
     }
 
     @Transactional
