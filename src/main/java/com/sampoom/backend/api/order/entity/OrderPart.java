@@ -18,13 +18,22 @@ public class OrderPart {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @Column(name = "category_id", nullable = false)
     private Long categoryId;
+    @Column(name = "category_name", nullable = false)
     private String categoryName;
+    @Column(name = "group_id", nullable = false)
     private Long groupId;
+    @Column(name = "group_name", nullable = false)
     private String groupName;
+    @Column(name = "part_id", nullable = false)
     private Long partId;
+    @Column(nullable = false)
     private String code;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private Integer quantity;
+    @Column(name = "standard_cost", nullable = false)
     private Integer standardCost;
 }
