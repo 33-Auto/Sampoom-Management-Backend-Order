@@ -8,10 +8,11 @@ import lombok.Getter;
 @Getter
 public enum OrderStatus {
     PENDING("대기 중"),
-    CONFIRMED("주문 확인"),
-    SHIPPING("배송 중"),
-    DELAYED("배송 지연"),
-    PRODUCING("생산 중"),
+    CONFIRMED("출고 대기"),
+    DELAYED("재고 부족"),
+    SHIPPING("출고 진행"),
+    SHIPPED("출고 완료"),
+    DELIVERING("배송 중"),
     ARRIVED("배송 완료"),
     COMPLETED("입고 완료"),
     CANCELED("주문 취소");
