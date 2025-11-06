@@ -26,4 +26,5 @@ public class OrderPart {
     private String code;
     private String name;
     private Integer quantity;
+    private Integer standardCost;
 }

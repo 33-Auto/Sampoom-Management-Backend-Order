@@ -22,8 +22,8 @@ public class OrderPartService {
         if (items.isEmpty()) throw new BadRequestException(ErrorStatus.NO_CATEGORY_REQUEST.getMessage());
 
         String sql = """
-        INSERT INTO order_part (order_id, category_id, category_name, group_id, group_name, part_id, code, name, quantity)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO order_part (order_id, category_id, category_name, group_id, group_name, part_id, code, name, quantity, standard_cost)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         var query = entityManager.createNativeQuery(sql);
@@ -52,6 +52,7 @@ public class OrderPartService {
                     query.setParameter(7, itemPart.getCode());
                     query.setParameter(8, itemPart.getName());
                     query.setParameter(9, itemPart.getQuantity());
+                    query.setParameter(10, itemPart.getStandardCost());
                     query.executeUpdate();
                 }
             }
