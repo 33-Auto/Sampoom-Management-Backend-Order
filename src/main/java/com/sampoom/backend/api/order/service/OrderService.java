@@ -2,6 +2,7 @@ package com.sampoom.backend.api.order.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sampoom.backend.api.client.warehouse.WarehouseClient;
 import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderPart;
@@ -27,6 +28,7 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class OrderService {
     private final OrderPartService orderPartService;
     private final EventOutboxRepository eventOutboxRepository;
     private final ObjectMapper objectMapper;
+    private final WarehouseClient warehouseClient;
 
     @Transactional
     public OrderResDto createOrder(OrderReqDto orderReqDto) {
@@ -257,5 +260,29 @@ public class OrderService {
         order.setWarehouseId(orderWarehouseEvent.getWarehouseId());
         order.setWarehouseName(orderWarehouseEvent.getWarehouseName());
         orderRepository.save(order);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderWithStockDto> getOrdersForOutbound(OutboundFilterDto outboundFilterDto, Pageable pageable) {
+        Page<OrderWithStockDto> orderPage = orderRepository.outboundSearch(outboundFilterDto, pageable);
+        List<Long> partIds = orderPage.getContent().stream()
+                .flatMap(order -> order.getItems().stream())
+                .map(PartStockDto::getPartId)
+                .distinct()
+                .toList();
+
+        List<PartStockResDto> stockList = warehouseClient.getCurrentStocks(outboundFilterDto.getWarehouseId(), partIds);
+
+        Map<Long, Integer> stockMap = stockList.stream()
+                .collect(Collectors.toMap(PartStockResDto::getId, PartStockResDto::getQuantity));
+
+        orderPage.getContent().forEach(order -> {
+            order.getItems().forEach(item -> {
+                Integer stock = stockMap.get(item.getPartId());
+                item.setStock(stock != null ? stock : 0);
+            });
+        });
+
+        return orderPage;
     }
 }
