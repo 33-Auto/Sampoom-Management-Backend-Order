@@ -1,6 +1,8 @@
 package com.sampoom.backend.api.order.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sampoom.backend.api.order.dto.OrderWithStockDto;
@@ -14,8 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -41,32 +42,58 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
             condition.and(order.branch.contains(req.getKeyword())
                     .or(order.orderNumber.contains(req.getKeyword())));
 
-        List<OrderWithStockDto> results = queryFactory
-                .selectDistinct(Projections.constructor(
-                        OrderWithStockDto.class,
+        List<Tuple> tuples = queryFactory
+                .select(
                         order.id,
                         order.orderNumber,
                         order.branch.as("agencyName"),
                         order.status,
                         order.createdAt,
-                        Projections.list(Projections.constructor(
-                                PartStockDto.class,
-                                part.categoryName,
-                                part.groupName,
-                                part.partId,
-                                part.name,
-                                part.code,
-                                part.quantity.as("orderQuantity"),
-                                part.standardCost
-                        ))
-                ))
+                        part.categoryName,
+                        part.groupName,
+                        part.partId,
+                        part.name,
+                        part.code,
+                        part.quantity.as("orderQuantity"),
+                        part.standardCost
+                )
                 .from(order)
                 .leftJoin(order.orderParts, part)
                 .where(condition)
+                .orderBy(order.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(order.createdAt.desc())
                 .fetch();
+
+        Map<Long, OrderWithStockDto> grouped = new LinkedHashMap<>();
+
+        for (Tuple tuple : tuples) {
+            Long orderId = tuple.get(order.id);
+
+            OrderWithStockDto dto = grouped.computeIfAbsent(orderId, id -> OrderWithStockDto.builder()
+                    .orderId(tuple.get(order.id))
+                    .orderNumber(tuple.get(order.orderNumber))
+                    .agencyName(tuple.get(order.branch.as("agencyName")))
+                    .status(tuple.get(order.status))
+                    .createdAt(tuple.get(order.createdAt))
+                    .items(new ArrayList<>())
+                    .build()
+            );
+
+            if (tuple.get(part.partId) != null) {
+                dto.getItems().add(PartStockDto.builder()
+                        .categoryName(tuple.get(part.categoryName))
+                        .groupName(tuple.get(part.groupName))
+                        .partId(tuple.get(part.partId))
+                        .name(tuple.get(part.name))
+                        .code(tuple.get(part.code))
+                        .orderQuantity(tuple.get(part.quantity.as("orderQuantity")))
+                        .standardCost(tuple.get(part.standardCost))
+                        .build());
+            }
+        }
+
+        List<OrderWithStockDto> results = new ArrayList<>(grouped.values());
 
         long total = Optional.ofNullable(
                 queryFactory
@@ -75,7 +102,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
                         .leftJoin(order.orderParts, part)
                         .where(condition)
                         .fetchOne()
-                ).orElse(0L);
+        ).orElse(0L);
 
         return new PageImpl<>(results, pageable, total);
     }
