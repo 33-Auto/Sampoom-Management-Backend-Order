@@ -11,4 +11,5 @@ public class ItemPartDto {
     private String name;
     private String code;
     private Integer quantity;
+    private Integer standardCost;
 }

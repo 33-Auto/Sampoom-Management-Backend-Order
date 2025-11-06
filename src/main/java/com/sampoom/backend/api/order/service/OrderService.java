@@ -172,7 +172,8 @@ public class OrderService {
                             part.getPartId(),
                             part.getName(),
                             part.getCode(),
-                            part.getQuantity()
+                            part.getQuantity(),
+                            part.getStandardCost()
                     )
             );
         }
