@@ -53,7 +53,7 @@ public class BomEventConsumer {
                 log.info("✅ BomUpdated saved: {}", payload.getPartName());
             }
         } catch (Exception e) {
-            log.error("❌ Failed to process bom event" + message);
+            log.error("❌ Failed to process bom event: {}, {}", message, e.getMessage());
             throw new RuntimeException("Kafka message processing failed", e);
         }
     }
