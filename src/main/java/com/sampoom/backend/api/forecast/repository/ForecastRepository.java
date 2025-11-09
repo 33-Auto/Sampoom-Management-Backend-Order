@@ -18,16 +18,15 @@ public interface ForecastRepository extends JpaRepository<Forecast, Long> {
             p.id,
             p.code,
             p.name,
-            SUM(op.quantity),
-            function('date_trunc', 'month', o.createdAt)
+            SUM(op.quantity)
         )
         FROM OrderPart op
         JOIN op.order o
         JOIN Part p ON op.partId = p.id
         WHERE p.complexity = 'COMPLEX'
             AND o.createdAt >= :sixMonthsAgo
-        GROUP BY o.warehouseId, p.id, p.code, p.name, function('date_trunc', 'month', o.createdAt)
-        ORDER BY o.warehouseId, function('date_trunc', 'month', o.createdAt)
+        GROUP BY o.warehouseId, p.id, p.code, p.name
+        ORDER BY o.warehouseId, p.id
     """)
     List<SixMonthDemandDto> findMonthlyComplexPartDemand(@Param("sixMonthsAgo") LocalDateTime sixMonthsAgo);
 }
