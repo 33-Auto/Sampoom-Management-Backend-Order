@@ -26,7 +26,17 @@ public class BomEventConsumer {
         try {
             JsonNode root = objectMapper.readTree(message);
             String eventType = root.get("eventType").asText();
+            if (eventType == null || eventType.isEmpty()) {
+                log.info("❌ Missing eventType in message: {}", message);
+                return;
+            }
+
             Class<?> payloadClass = eventPayloadMapper.getPayloadClass(eventType);
+            if (payloadClass == null) {
+                log.info("⚠️ Unknown event type, skipping: {}", eventType);
+                return;
+            }
+
             Event<?> event = objectMapper.readValue(
                     message,
                     objectMapper.getTypeFactory().constructParametricType(Event.class, payloadClass)
