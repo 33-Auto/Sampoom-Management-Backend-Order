@@ -27,6 +27,7 @@ public enum ErrorStatus {
     ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 완료된 주문입니다."),
     FAIL_SERIALIZE(HttpStatus.BAD_REQUEST, "직렬화에 실패하였습니다."),
     NOT_ARRIVED_ORDER(HttpStatus.BAD_REQUEST, "배송 완료되지 않은 주문은 입고할 수 없습니다."),
+    DUPLICATE_PART_ID(HttpStatus.BAD_REQUEST, "중복된 부품에 대한 생성 요청입니다."),
 
     // 401 UNAUTHORIZED
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
@@ -37,6 +38,7 @@ public enum ErrorStatus {
     // 404 NOT_FOUND
     NOT_FOUND(HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주문을 찾을 수 없습니다."),
+    PART_NOT_FOUND(HttpStatus.NOT_FOUND, "업데이트할 부품을 찾을 수 없습니다."),
 
 
 
