@@ -7,7 +7,7 @@ import com.sampoom.backend.api.order.dto.*;
 import com.sampoom.backend.api.order.entity.Order;
 import com.sampoom.backend.api.order.entity.OrderPart;
 import com.sampoom.backend.api.order.entity.OrderStatus;
-import com.sampoom.backend.api.order.entity.EventOutbox;
+import com.sampoom.backend.api.event.entity.EventOutbox;
 import com.sampoom.backend.api.order.event.OrderCancelEvent;
 import com.sampoom.backend.api.order.event.ToWarehouseEvent;
 import com.sampoom.backend.api.order.repository.EventOutboxRepository;
