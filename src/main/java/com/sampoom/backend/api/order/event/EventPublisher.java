@@ -1,6 +1,5 @@
 package com.sampoom.backend.api.order.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sampoom.backend.api.order.entity.EventOutbox;
 import com.sampoom.backend.api.order.entity.EventStatus;
 import com.sampoom.backend.api.order.repository.EventOutboxRepository;
