@@ -11,6 +11,7 @@ import java.util.List;
 @ToString
 @Builder
 public class OrderReqDto {
+    private Long agencyId;
     private String agencyName;
     private List<ItemCategoryDto> items;
 }

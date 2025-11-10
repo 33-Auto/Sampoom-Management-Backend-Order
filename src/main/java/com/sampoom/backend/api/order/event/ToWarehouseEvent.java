@@ -16,7 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ToWarehouseEvent {
     private Long orderId;
-    private String branch;
+    private Long agencyId;
+    private String agencyName;
     private List<ItemBriefDto> items;
     private Long version;
     private OffsetDateTime sourceUpdatedAt;

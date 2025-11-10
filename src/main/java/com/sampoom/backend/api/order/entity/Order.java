@@ -23,8 +23,11 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String orderNumber;
 
+    @Column(name = "agency_id", nullable = false)
+    private Long agencyId;
+
     @Column(nullable = false)
-    private String branch;
+    private String agencyName;
 
     private Long warehouseId;
     private String warehouseName;

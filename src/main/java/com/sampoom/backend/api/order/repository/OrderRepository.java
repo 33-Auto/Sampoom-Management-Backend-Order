@@ -14,15 +14,15 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderQueryR
     @Query("""
             SELECT o
             FROM Order o
-            WHERE (:branch IS NULL OR o.branch = :branch)
+            WHERE (:branch IS NULL OR o.agencyName = :branch)
             """)
-    Page<Order> findWithItemsByBranch(@Param("branch") String branch, Pageable pageable);
+    Page<Order> findWithItemsByAgencyName(@Param("branch") String branch, Pageable pageable);
 
     @Query("""
         SELECT o
         FROM Order o
         WHERE o.warehouseId = :warehouseId
-        AND (:branch IS NULL OR o.branch = :branch)
+        AND (:branch IS NULL OR o.agencyName = :branch)
         AND (:status IS NULL OR o.status = :status)
     """)
     Page<Order> findOrdersForWarehouse(

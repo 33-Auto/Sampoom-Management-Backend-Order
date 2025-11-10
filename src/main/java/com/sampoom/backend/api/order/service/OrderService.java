@@ -43,7 +43,8 @@ public class OrderService {
     public OrderResDto createOrder(OrderReqDto orderReqDto) {
         Order newOrder = Order.builder()
                 .orderNumber(this.makeOrderName())
-                .branch(orderReqDto.getAgencyName())
+                .agencyId(orderReqDto.getAgencyId())
+                .agencyName(orderReqDto.getAgencyName())
                 .status(OrderStatus.PENDING)
                 .build();
         orderRepository.saveAndFlush(newOrder);
@@ -60,7 +61,8 @@ public class OrderService {
 
         ToWarehouseEvent toWarehouseEvent = ToWarehouseEvent.builder()
                 .orderId(newOrder.getId())
-                .branch(orderReqDto.getAgencyName())
+                .agencyId(orderReqDto.getAgencyId())
+                .agencyName(orderReqDto.getAgencyName())
                 .items(briefDtos)
                 .version(newOrder.getVersion())
                 .sourceUpdatedAt(newOrder.getCreatedAt().atOffset(ZoneOffset.ofHours(9)))
@@ -82,6 +84,7 @@ public class OrderService {
         return OrderResDto.builder()
                 .orderId(newOrder.getId())
                 .orderNumber(newOrder.getOrderNumber())
+                .agencyId(orderReqDto.getAgencyId())
                 .agencyName(orderReqDto.getAgencyName())
                 .status(OrderStatus.PENDING)
                 .items(orderReqDto.getItems())
@@ -93,7 +96,7 @@ public class OrderService {
     public Page<OrderResDto> getOrders(String from, int page, int size) {
         final String normalizedBranch = StringUtils.hasText(from) ? from.trim() : null;
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Order> orders = orderRepository.findWithItemsByBranch(normalizedBranch, pageable);
+        Page<Order> orders = orderRepository.findWithItemsByAgencyName(normalizedBranch, pageable);
 
         return orders.map(this::mapToOrderResDto);
     }
@@ -112,7 +115,8 @@ public class OrderService {
         return OrderResDto.builder()
                 .orderId(order.getId())
                 .orderNumber(order.getOrderNumber())
-                .agencyName(order.getBranch())
+                .agencyId(order.getAgencyId())
+                .agencyName(order.getAgencyName())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt().toString())
                 .items(this.convertOrderItems(order.getOrderParts()))
@@ -134,7 +138,8 @@ public class OrderService {
         return OrderResDto.builder()
                 .orderId(order.getId())
                 .orderNumber(order.getOrderNumber())
-                .agencyName(order.getBranch())
+                .agencyId(order.getAgencyId())
+                .agencyName(order.getAgencyName())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt().toString())
                 .items(this.convertOrderItems(order.getOrderParts()))
