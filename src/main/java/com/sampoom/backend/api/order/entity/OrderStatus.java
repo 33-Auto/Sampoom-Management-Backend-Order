@@ -23,12 +23,13 @@ public enum OrderStatus {
     }
 
     @JsonCreator
-    public static OrderStatus fromKorean(String koreanName) {
+    public static OrderStatus fromInput(String input) {
         for (OrderStatus status : values()) {
-            if (status.korean.equals(koreanName)) {
+            if (status.name().equalsIgnoreCase(input) || status.korean.equals(input)) {
                 return status;
             }
         }
-        throw new BadRequestException(ErrorStatus.INVALID_ORDER_STATUS.getMessage() + koreanName);
+
+        throw new BadRequestException(ErrorStatus.INVALID_ORDER_STATUS.getMessage() + input);
     }
 }
