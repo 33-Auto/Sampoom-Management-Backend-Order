@@ -11,6 +11,7 @@ import java.util.List;
 public class OrderResDto {
     private Long orderId;
     private String orderNumber;
+    private Long agencyId;
     private String agencyName;
     private OrderStatus status;
     private String createdAt;

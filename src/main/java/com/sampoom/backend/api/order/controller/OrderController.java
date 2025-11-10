@@ -8,6 +8,7 @@ import com.sampoom.backend.api.order.entity.OrderStatus;
 import com.sampoom.backend.api.order.service.OrderService;
 import com.sampoom.backend.common.response.ApiResponse;
 import com.sampoom.backend.common.response.SuccessStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,15 +16,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<OrderResDto>> createOrder(@RequestBody OrderReqDto order) {
+    public ResponseEntity<ApiResponse<OrderResDto>> createOrder(@Valid @RequestBody OrderReqDto order) {
         OrderResDto orderResDto = orderService.createOrder(order);
 
         return ApiResponse.success(SuccessStatus.CREATED, orderResDto);

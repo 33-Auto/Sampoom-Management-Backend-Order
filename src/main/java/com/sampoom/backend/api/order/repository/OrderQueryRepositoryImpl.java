@@ -39,14 +39,14 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
         if (req.getGroupId() != null)
             condition.and(part.groupId.eq(req.getGroupId()));
         if (req.getKeyword() != null && !req.getKeyword().isEmpty())
-            condition.and(order.branch.contains(req.getKeyword())
+            condition.and(order.agencyName.contains(req.getKeyword())
                     .or(order.orderNumber.contains(req.getKeyword())));
 
         List<Tuple> tuples = queryFactory
                 .select(
                         order.id,
                         order.orderNumber,
-                        order.branch.as("agencyName"),
+                        order.agencyName,
                         order.status,
                         order.createdAt,
                         part.categoryName,
@@ -73,7 +73,7 @@ public class OrderQueryRepositoryImpl implements OrderQueryRepository {
             OrderWithStockDto dto = grouped.computeIfAbsent(orderId, id -> OrderWithStockDto.builder()
                     .orderId(tuple.get(order.id))
                     .orderNumber(tuple.get(order.orderNumber))
-                    .agencyName(tuple.get(order.branch.as("agencyName")))
+                    .agencyName(tuple.get(order.agencyName))
                     .status(tuple.get(order.status))
                     .createdAt(tuple.get(order.createdAt))
                     .items(new ArrayList<>())
