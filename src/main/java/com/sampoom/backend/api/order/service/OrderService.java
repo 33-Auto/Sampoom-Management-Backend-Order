@@ -282,7 +282,6 @@ public class OrderService {
                 .distinct()
                 .toList();
 
-        log.info("token: {}", token);
         List<PartStockResDto> stockList = warehouseClient.getCurrentStocks(
                 outboundFilterDto.getWarehouseId(),
                 partIds,
