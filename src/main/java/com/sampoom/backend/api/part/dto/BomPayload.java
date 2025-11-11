@@ -1,7 +1,7 @@
 package com.sampoom.backend.api.part.dto;
 
 import com.sampoom.backend.api.part.entity.BomComplexity;
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

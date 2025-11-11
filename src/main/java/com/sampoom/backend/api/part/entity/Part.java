@@ -1,6 +1,6 @@
 package com.sampoom.backend.api.part.entity;
 
-import com.sampoom.backend.common.entitiy.Status;
+import com.sampoom.backend.common.entity.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
