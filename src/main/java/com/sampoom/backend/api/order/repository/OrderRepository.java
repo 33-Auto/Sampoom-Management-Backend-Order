@@ -22,7 +22,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderQueryR
         SELECT o
         FROM Order o
         WHERE o.warehouseId = :warehouseId
-        AND (:branch IS NULL OR o.agencyName = :agencyName)
+        AND (:agencyName IS NULL OR o.agencyName = :agencyName)
         AND (:status IS NULL OR o.status = :status)
     """)
     Page<Order> findOrdersForWarehouse(
