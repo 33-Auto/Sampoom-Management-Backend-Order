@@ -14,6 +14,7 @@ public class ApiResponse<T> {
     private final boolean success;
     private final String message;
     private T data;
+    private final int code;
 
     public static <T> ResponseEntity<ApiResponse<T>> success(SuccessStatus status, T data) {
         ApiResponse<T> response = ApiResponse.<T>builder()
@@ -50,4 +51,12 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    // 새로운 에러 응답 형식을 위한 메서드 추가
+    public static ApiResponse<Void> errorWithCode(int code, String message) {
+        return ApiResponse.<Void>builder()
+                .code(code)
+                .success(false)
+                .message(message)
+                .build();
+    }
 }
