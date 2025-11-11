@@ -14,7 +14,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderQueryR
     @Query("""
             SELECT o
             FROM Order o
-            WHERE (:branch IS NULL OR o.agencyName = :agencyName)
+            WHERE (:agencyName IS NULL OR o.agencyName = :agencyName)
             """)
     Page<Order> findWithItemsByAgencyName(@Param("agencyName") String agencyName, Pageable pageable);
 
