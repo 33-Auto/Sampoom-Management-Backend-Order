@@ -68,7 +68,8 @@ public class OrderController {
                                                                                 @RequestParam(required = false) String keyword,
                                                                                 @RequestParam(required = false) OrderStatus status,
                                                                                 @RequestParam(defaultValue = "0") int page,
-                                                                                @RequestParam(defaultValue = "20") int size) {
+                                                                                @RequestParam(defaultValue = "20") int size,
+                                                                                @CookieValue("ACCESS_TOKEN") String token) {
         OutboundFilterDto outboundFilterDto = OutboundFilterDto.builder()
                 .warehouseId(warehouseId)
                 .categoryId(categoryId)
@@ -78,6 +79,6 @@ public class OrderController {
                 .build();
         Pageable pageable = PageRequest.of(page, size);
 
-        return ApiResponse.success(SuccessStatus.OK, orderService.getOrdersForOutbound(outboundFilterDto, pageable));
+        return ApiResponse.success(SuccessStatus.OK, orderService.getOrdersForOutbound(outboundFilterDto, pageable, token));
     }
 }
