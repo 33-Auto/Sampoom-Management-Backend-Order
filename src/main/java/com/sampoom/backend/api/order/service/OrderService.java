@@ -16,10 +16,13 @@ import com.sampoom.backend.common.exception.BadRequestException;
 import com.sampoom.backend.common.exception.NotFoundException;
 import com.sampoom.backend.common.response.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -32,6 +35,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderPartService orderPartService;
@@ -268,7 +272,9 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderWithStockDto> getOrdersForOutbound(OutboundFilterDto outboundFilterDto, Pageable pageable) {
+    public Page<OrderWithStockDto> getOrdersForOutbound(OutboundFilterDto outboundFilterDto,
+                                                        Pageable pageable,
+                                                        String token) {
         Page<OrderWithStockDto> orderPage = orderRepository.outboundSearch(outboundFilterDto, pageable);
         List<Long> partIds = orderPage.getContent().stream()
                 .flatMap(order -> order.getItems().stream())
@@ -276,7 +282,12 @@ public class OrderService {
                 .distinct()
                 .toList();
 
-        List<PartStockResDto> stockList = warehouseClient.getCurrentStocks(outboundFilterDto.getWarehouseId(), partIds);
+        log.info("token: {}", token);
+        List<PartStockResDto> stockList = warehouseClient.getCurrentStocks(
+                outboundFilterDto.getWarehouseId(),
+                partIds,
+                token
+        );
 
         Map<Long, Integer> stockMap = stockList.stream()
                 .collect(Collectors.toMap(PartStockResDto::getId, PartStockResDto::getQuantity));

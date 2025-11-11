@@ -24,7 +24,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         Server localServer = new Server()
-                .url("http://localhost:8080")
+                .url("http://localhost:8082")
                 .description("로컬 서버");
 
         Server prodServer = new Server()
